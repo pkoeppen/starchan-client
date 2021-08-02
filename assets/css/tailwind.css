@@ -1,0 +1,19 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import '@fortawesome/fontawesome-free/css/all';
+@import 'simplebar/dist/simplebar.min.css';
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap');
+
+@layer base {
+  html {
+    font-size: 15px;
+  }
+  *:focus {
+    @apply outline-none;
+  }
+}
+
+/* .simplebar-scrollbar.simplebar-visible::before {
+  opacity: .2 !important;
+} */

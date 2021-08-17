@@ -1,5 +1,5 @@
 module.exports = {
-  mode: 'jit',
+  // mode: 'jit',
   purge: [
     './components/**/*.{vue,js}',
     './layouts/**/*.vue',
@@ -86,10 +86,14 @@ module.exports = {
       },
       maxWidth: {
         '1/4': '25%',
+        '1/3': '33.333333%',
         '1/2': '50%',
+        '2/3': '66.666667%',
         '3/4': '75%',
         '25vw': '25vw',
+        '33vw': '33.333333vw',
         '50vw': '50vw',
+        '66vw': '66.666667vw',
         '75vw': '75vw',
       },
       maxHeight: {

@@ -39,7 +39,10 @@
           <div
             v-if="$route.path === `/${thread.boardId}/thread/${thread.id}/`"
             class="menu-item border-b"
-            @click="appendToReply(post.id)"
+            @click="
+              appendToReply(post.id);
+              showPostMenu = false;
+            "
           >
             <span>Reply</span><i class="fas fa-reply text-xs text-gray-600" />
           </div>
@@ -54,7 +57,10 @@
           <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b">
             <span>Hide</span>
           </div>
-          <div class="menu-item border-b-2 text-red-500">
+          <div
+            class="menu-item border-b-2 text-red-500"
+            @click="showReportPostModal()"
+          >
             <span>Report </span>
           </div>
 
@@ -63,10 +69,14 @@
             <div class="menu-item" @click="showDeletePostModal()">
               <span>Delete</span>
             </div>
-            <div class="menu-item border-t">
+            <div class="menu-item border-t" @click="showBanPostModal()">
               <span>Ban</span>
             </div>
-            <div v-if="isOp" class="menu-item border-t">
+            <div
+              v-if="isRootPost"
+              class="menu-item border-t"
+              @click="showEditThreadModal()"
+            >
               <span>Thread</span><i class="fas fa-cog text-xs text-gray-600" />
             </div>
           </template>
@@ -88,50 +98,33 @@
     <div class="flex flex-col flex-grow">
       <!-- Author -->
       <div
-        class="space-x-1 relative"
-        :class="post.files && post.files.length ? 'mb-1' : 'mb-2'"
+        class="space-x-2 relative flex items-end"
+        :class="post.files && post.files.length ? 'mb-1' : 'mb-3'"
         style="line-height: 14px"
       >
         <span class="font-bold font-display" style="font-size: 14px">{{
-          post.name
+          post.user ? post.user.username : post.name
         }}</span>
+
         <!-- Tags -->
-        <div class="inline-block">
+        <div class="inline-flex space-x-1">
+          <!-- User -->
+          <badge v-if="post.user" :color="authorTagColor">
+            ## {{ userRole }}
+          </badge>
+
           <!-- Tripcode -->
-          <div
-            v-if="post.tripcode"
-            style="font-size: 10px; padding: 0 3px"
-            :style="authorTagColor"
-            class="font-display inline-block font-bold rounded text-white"
-          >
+          <badge v-else-if="post.tripcode" :color="authorTagColor">
             !{{ post.tripcode }}
-          </div>
+          </badge>
 
           <!-- Author ID -->
-          <div
-            v-else
-            style="font-size: 10px; padding: 0 3px"
-            :style="authorTagColor"
-            class="font-display inline-block font-bold rounded text-white"
-          >
+          <badge v-else :color="authorTagColor">
             {{ post.authorId.slice(-6) }}
-          </div>
+          </badge>
 
           <!-- OP -->
-          <div
-            v-if="isOp"
-            style="font-size: 10px; padding: 0 3px"
-            class="
-              font-display
-              inline-block
-              bg-blue-500
-              font-bold
-              rounded
-              text-white
-            "
-          >
-            OP
-          </div>
+          <badge v-if="isOp" class="bg-blue-500"> OP </badge>
         </div>
 
         <!-- IP Address -->
@@ -162,7 +155,11 @@
       </div>
 
       <!-- Files -->
-      <div v-if="post.files && post.files.length" class="flex mb-4">
+      <div
+        v-if="post.files && post.files.length"
+        class="flex"
+        :class="{ 'mb-4': post.bodyHtml }"
+      >
         <!-- File Container -->
         <div
           v-for="(file, index) of post.files"
@@ -170,64 +167,80 @@
           class="space-y-0.5 w-1/4 pr-2"
         >
           <!-- Filename, Filesize & Menu Twirldown -->
-          <div class="relative inline-block">
-            <div
-              class="
-                inline-flex
-                items-center
-                text-gray-500
-                cursor-pointer
-                max-w-full
-              "
-              @click="
-                fileOptions[file.id].showFileMenu =
-                  !fileOptions[file.id].showFileMenu
-              "
-            >
-              <span class="text-xs tracking-wide mr-1 truncate">{{
-                file.filename
-              }}</span
-              ><span class="text-xs mr-1 tracking-wide whitespace-nowrap"
-                >({{ readableFileSize(file.size) }})</span
-              ><i class="fas fa-caret-down text-xs" />
-            </div>
-            <!-- File Menu -->
-            <div v-show="fileOptions[file.id].showFileMenu">
+          <div>
+            <div class="relative inline-block max-w-full">
               <div
                 class="
-                  absolute
-                  bg-white
-                  rounded
-                  top-6
-                  -right-10
-                  font-display
-                  z-20
-                  overflow-hidden
-                  shadow
+                  flex
+                  items-center
+                  text-gray-500
+                  cursor-pointer
+                  max-w-full
+                "
+                @click="
+                  fileOptions[file.id].showFileMenu =
+                    !fileOptions[file.id].showFileMenu
                 "
               >
-                <div
-                  class="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b"
-                  @click="isHidden(file) ? showFile(file) : hideFile(file)"
-                >
-                  <span>{{ isHidden(file) ? 'Show' : 'Hide' }}</span>
-                </div>
+                <span
+                  class="text-xs tracking-wide mr-1 truncate"
+                  :title="file.filename"
+                  >{{ file.filename }}</span
+                ><span class="text-xs mr-1 tracking-wide whitespace-nowrap"
+                  >({{ readableFileSize(file.size) }})</span
+                ><i class="fas fa-caret-down text-xs" />
+              </div>
+
+              <!-- File Menu -->
+              <div v-show="fileOptions[file.id].showFileMenu">
                 <div
                   class="
-                    px-3
-                    py-2
-                    hover:bg-gray-100
-                    cursor-pointer
-                    text-red-500
+                    absolute
+                    bg-white
+                    rounded
+                    top-5
+                    -right-10
+                    font-display
+                    z-20
+                    overflow-hidden
+                    shadow
                   "
                 >
-                  <span>Report </span>
+                  <div
+                    class="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b"
+                    @click="isHidden(file) ? showFile(file) : hideFile(file)"
+                  >
+                    <span>{{ isHidden(file) ? 'Show' : 'Hide' }}</span>
+                  </div>
+                  <a
+                    :href="`${baseDataUrl}/files/${file.id}`"
+                    target="_blank"
+                    class="block px-3 py-2 hover:bg-gray-100 border-b"
+                    @click="fileOptions[file.id].showFileMenu = false"
+                  >
+                    <span>Download</span>
+                  </a>
+                  <div
+                    class="
+                      px-3
+                      py-2
+                      hover:bg-gray-100
+                      cursor-pointer
+                      text-red-500
+                    "
+                    @click="
+                      fileOptions[file.id].showFileMenu = false;
+                      showReportPostModal();
+                    "
+                  >
+                    <span>Report </span>
+                  </div>
                 </div>
+                <div
+                  class="fixed inset-0 z-10"
+                  @click="fileOptions[file.id].showFileMenu = false"
+                />
               </div>
-              <div
-                class="fixed inset-0 z-10"
-                @click="fileOptions[file.id].showFileMenu = false"
-              />
             </div>
           </div>
 
@@ -284,7 +297,7 @@
       </div>
 
       <!-- Post Body -->
-      <div class="space-y-2" v-html="post.bodyHtml" />
+      <div v-if="post.bodyHtml" class="space-y-2" v-html="post.bodyHtml" />
 
       <div
         v-if="post.bannedForThisPost"
@@ -317,7 +330,6 @@
 import { mapMutations, mapState } from 'vuex';
 import { format } from 'date-fns';
 import filesize from 'filesize';
-import Identicon from 'identicon.js';
 
 export default {
   props: {
@@ -327,6 +339,10 @@ export default {
     },
     thread: {
       type: Object,
+      required: true,
+    },
+    rootAuthorId: {
+      type: String,
       required: true,
     },
     showReplies: {
@@ -355,33 +371,54 @@ export default {
   computed: {
     ...mapState(['modRoute']),
     isOp() {
+      return this.rootAuthorId === this.post.authorId;
+    },
+    isRootPost() {
       return this.post.id === this.thread.id;
+    },
+    isModPost() {
+      return !!this.post.user;
     },
     showNsfw() {
       return this.$store.state.showNsfw;
     },
     identicon() {
-      try {
-        const identicon = new Identicon(
-          (this.post.tripcode || '') + this.post.authorId,
-          {
-            margin: 0.2,
-            size: 32,
-            format: 'svg',
-          }
-        );
-        return identicon;
-      } catch (error) {
-        // Probably the 'hash of at least 15 characters is required' error.
+      if (this.isModPost && this.userRole) {
+        let foreground;
+        if (this.userRole === 'OWNER') {
+          foreground = [0, 0, 0, 255];
+        }
+        if (this.userRole === 'ADMIN') {
+          foreground = [255, 0, 0, 255];
+        }
+        if (this.userRole === 'MODERATOR') {
+          foreground = [0, 0, 255, 255];
+        }
+        if (this.userRole === 'JANITOR') {
+          foreground = [0, 200, 0, 255];
+        }
+        const username = this.post.user.username;
+        return this.$identicon(username.padEnd(15, Date.now()), {
+          foreground,
+          background: [229, 231, 235, 255],
+        });
+      } else {
+        return this.$identicon((this.post.tripcode || '') + this.post.authorId);
       }
-      return null;
     },
     base64Src() {
       return `data:image/svg+xml;base64,${this.identicon.toString()}`;
     },
     authorTagColor() {
-      const [r, g, b] = this.identicon.foreground;
-      return `background-color: rgb(${r},${g},${b});`;
+      const [r, g, b] = this.identicon?.foreground || [33, 33, 33];
+      return `rgb(${r},${g},${b});`;
+    },
+    userRole() {
+      if (this.post.user) {
+        const role = this.post.user.roles[0];
+        return role.level;
+      }
+      return null;
     },
   },
   methods: {
@@ -430,6 +467,45 @@ export default {
           threadId: this.thread.id,
           boardId: this.thread.boardId,
           ipAddress: this.post.ipAddress,
+        },
+      });
+      this.showPostMenu = false;
+    },
+    showReportPostModal() {
+      this.showModal({
+        modal: 'reportPost',
+        data: {
+          postId: this.post.id,
+          threadId: this.thread.id,
+          boardId: this.thread.boardId,
+          ipAddress: this.post.ipAddress,
+        },
+      });
+      this.showPostMenu = false;
+    },
+    showBanPostModal() {
+      this.showModal({
+        modal: 'banPost',
+        data: {
+          postId: this.post.id,
+          threadId: this.thread.id,
+          boardId: this.thread.boardId,
+          ipAddress: this.post.ipAddress,
+        },
+      });
+      this.showPostMenu = false;
+    },
+    showEditThreadModal() {
+      this.showModal({
+        modal: 'editThread',
+        data: {
+          threadId: this.thread.id,
+          sticky: this.thread.sticky,
+          locked: this.thread.locked,
+          anchored: this.thread.anchored,
+          cycle: this.thread.cycle,
+          archived: this.thread.archived,
+          willArchive: this.thread.willArchive,
         },
       });
       this.showPostMenu = false;

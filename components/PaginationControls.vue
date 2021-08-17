@@ -1,8 +1,6 @@
 <template>
   <!-- Thread Controls -->
-  <div
-    class="h-14 px-3 flex items-center justify-between border-b rounded shadow"
-  >
+  <div class="h-14 px-3 flex items-center justify-between rounded shadow">
     <div
       class="
         w-8

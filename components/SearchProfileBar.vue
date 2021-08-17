@@ -66,7 +66,7 @@
               >
                 <span>Logged in as:</span
                 ><span class="text-red-500 ml-1.5 tracking-tight">{{
-                  modData.username
+                  userData.username
                 }}</span>
               </nuxt-link>
               <button
@@ -160,7 +160,7 @@ export default {
     ...mapState({
       identicon: (state) => state.identicon,
       modRoute: (state) => state.modRoute,
-      modData: (state) => state.api.modData || {},
+      userData: (state) => state.api.userData || {},
     }),
   },
   methods: {

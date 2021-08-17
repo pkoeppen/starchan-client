@@ -25,23 +25,31 @@
     </div>
     <!-- Board Select Menu -->
     <div v-if="showMenu">
-      <div class="absolute bg-white shadow rounded left-6 top-12 z-20">
+      <div
+        class="
+          absolute
+          bg-white
+          shadow-lg
+          rounded
+          overflow-hidden
+          left-6
+          top-12
+          z-20
+        "
+      >
+        <nuxt-link
+          to="/all/"
+          class="board-link"
+          @click.native="showMenu = false"
+        >
+          /all/ - Everything
+        </nuxt-link>
         <nuxt-link
           v-for="board of boards"
           :key="board.id"
           :to="`/${board.id}/`"
-          class="
-            block
-            px-4
-            py-3
-            bg-white
-            hover:bg-gray-100
-            cursor-pointer
-            border-b
-            whitespace-nowrap
-            text-sm
-            font-semibold
-          "
+          class="board-link"
+          @click.native="showMenu = false"
         >
           /{{ board.id }}/ - {{ board.title }}
         </nuxt-link>
@@ -70,3 +78,11 @@ export default {
   },
 };
 </script>
+<style scoped>
+.board-link {
+  @apply block px-4 py-3 bg-white hover:bg-gray-100 cursor-pointer border-b whitespace-nowrap text-sm font-semibold;
+}
+.board-link.nuxt-link-active {
+  @apply text-blue-700 hover:bg-white;
+}
+</style>

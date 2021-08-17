@@ -59,6 +59,12 @@ export default {
       },
     };
   },
+  mounted() {
+    this.$recaptcha.init();
+  },
+  beforeDestroy() {
+    this.$recaptcha.destroy();
+  },
   methods: {
     async submit() {
       this.loading = true;

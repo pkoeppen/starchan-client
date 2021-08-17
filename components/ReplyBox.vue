@@ -37,7 +37,7 @@
         <div class="flex flex-col justify-end">
           <small-button
             :icon="
-              showAdditionalFields ? 'fas fa-angle-down' : 'fas fa-angle-up'
+              showAdditionalFields ? 'fas fa-angle-up' : 'fas fa-angle-down'
             "
             @click.native="showAdditionalFields = !showAdditionalFields"
           />
@@ -149,8 +149,7 @@ export default {
     async submit() {
       this.loading = true;
       try {
-        await this.$recaptcha.init();
-        const recaptcha = await this.$recaptcha.execute('createPost');
+        const recaptcha = await this.$recaptcha.execute('addPost');
         const threadId = this.threadId;
         const formData = new FormData();
         for (const key in this.form) {
@@ -185,7 +184,6 @@ export default {
         console.error(error);
       } finally {
         this.loading = false;
-        this.$recaptcha.destroy();
       }
     },
     triggerFileInput() {

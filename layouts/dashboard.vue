@@ -1,9 +1,8 @@
 <template>
   <div class="fixed inset-0 flex">
     <!-- Modals -->
-    <lightbox />
-    <thread-modal />
-    <delete-post-modal />
+    <modal-edit-board />
+    <modal-edit-user />
 
     <!-- Sidebar -->
     <sidebar />

@@ -2,7 +2,7 @@
 
 export const state = () => ({
   authenticating: false,
-  modData: null,
+  userData: null,
   sessionData: null,
 });
 
@@ -13,10 +13,10 @@ export const actions = {
   logIn(context, { recaptcha, formData }) {
     context.commit('setAuthenticating', true);
     return this.$axios
-      .post(`/mod/login?recaptcha=${recaptcha}`, formData)
+      .post(`/users/login?recaptcha=${recaptcha}`, formData)
       .then(({ data }) => {
-        const { mod: modData, ...sessionData } = data;
-        context.commit('setModData', modData);
+        const { user: userData, ...sessionData } = data;
+        context.commit('setUserData', userData);
         context.commit('setSessionData', sessionData);
       })
       .catch(this.$catch)
@@ -28,11 +28,11 @@ export const actions = {
    */
   logOut(context) {
     return this.$axios
-      .post(`/mod/logout`)
+      .post(`/users/logout`)
       .catch(this.$catch)
       .finally(() => {
         setTimeout(() => {
-          context.commit('setModData', null);
+          context.commit('setUserData', null);
           context.commit('setSessionData', null);
         }, 0);
       });
@@ -71,13 +71,43 @@ export const actions = {
   /*
    * Adds a post reply to the given thread.
    */
-  addPost(context, { recaptcha, threadId, formData }) {
+  addPost(context, { recaptcha, formData }) {
     return this.$axios
       .put(`/posts?recaptcha=${recaptcha}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       })
+      .then(({ data }) => data)
+      .catch(this.$catch);
+  },
+
+  /*
+   * Gets multiple reports.
+   */
+  getReports(context, params) {
+    return this.$axios
+      .get(`/reports`, { params })
+      .then(({ data }) => data)
+      .catch(this.$catch);
+  },
+
+  /*
+   * Submits a new report on the given post.
+   */
+  addReport(context, { recaptcha, formData }) {
+    return this.$axios
+      .put(`/reports?recaptcha=${recaptcha}`, formData)
+      .then(({ data }) => data)
+      .catch(this.$catch);
+  },
+
+  /*
+   * Deletes a report by ID.
+   */
+  deleteReport(context, { reportId }) {
+    return this.$axios
+      .delete(`/reports/${reportId}`)
       .then(({ data }) => data)
       .catch(this.$catch);
   },
@@ -105,15 +135,85 @@ export const actions = {
       .then(({ data }) => data)
       .catch(this.$catch);
   },
+
+  /*
+   * Gets multiple bans.
+   */
+  getBans(context, params) {
+    return this.$axios
+      .get(`/bans`, { params })
+      .then(({ data }) => data)
+      .catch(this.$catch);
+  },
+
+  /*
+   * Creates a new ban for the given IP address.
+   */
+  addBan(context, { formData }) {
+    return this.$axios
+      .put(`/bans`, formData)
+      .then(({ data }) => data)
+      .catch(this.$catch);
+  },
+
+  /*
+   * Deletes a ban by ID.
+   */
+  deleteBan(context, { banId }) {
+    return this.$axios
+      .delete(`/bans/${banId}`)
+      .then(({ data }) => data)
+      .catch(this.$catch);
+  },
+
+  /*
+   * Updates a board by ID.
+   */
+  updateBoard(context, { boardId, formData }) {
+    return this.$axios
+      .post(`/boards/${boardId}`, formData)
+      .then(({ data }) => data)
+      .catch(this.$catch);
+  },
+
+  /*
+   * Gets multiple users.
+   */
+  getUsers(context, params) {
+    return this.$axios
+      .get(`/users`, { params })
+      .then(({ data }) => data)
+      .catch(this.$catch);
+  },
+
+  /*
+   * Updates a user by ID.
+   */
+  updateUser(context, { userId, formData }) {
+    return this.$axios
+      .post(`/users/${userId}`, formData)
+      .then(({ data }) => data)
+      .catch(this.$catch);
+  },
+
+  /*
+   * Gets multiple log entries.
+   */
+  getLogEntries(context, params) {
+    return this.$axios
+      .get(`/log`, { params })
+      .then(({ data }) => data)
+      .catch(this.$catch);
+  },
 };
 
 export const mutations = {
   setAuthenticating(_state, authenticating) {
     _state.authenticating = authenticating;
   },
-  setModData(_state, modData) {
-    _state.modData = modData;
-    if (process.browser && !modData) {
+  setUserData(_state, userData) {
+    _state.userData = userData;
+    if (process.browser && !userData) {
       const cookies = document.cookie.split(';');
       for (let i = 0; i < cookies.length; i++)
         clearCookie(cookies[i].split('=')[0]);

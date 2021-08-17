@@ -21,6 +21,7 @@ export default {
     '~/plugins/catch',
     '~/plugins/auth',
     '~/plugins/events',
+    '~/plugins/socket',
   ],
   components: true,
   buildModules: [

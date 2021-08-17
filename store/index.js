@@ -22,6 +22,11 @@ export const state = () => ({
       visible: false,
       data: {},
     },
+    // 'Report post' modal.
+    reportPost: {
+      visible: false,
+      data: {},
+    },
     // 'Delete post' modal.
     deletePost: {
       visible: false,
@@ -33,7 +38,17 @@ export const state = () => ({
       data: {},
     },
     // Thread options modal.
-    threadOptions: {
+    editThread: {
+      visible: false,
+      data: {},
+    },
+    // Board options modal.
+    editBoard: {
+      visible: false,
+      data: {},
+    },
+    // Edit user modal.
+    editUser: {
       visible: false,
       data: {},
     },
@@ -109,19 +124,19 @@ export const actions = {
         const cookies = cookie.parse(req.headers.cookie);
         const token = cookies.token;
         const expires = parseInt(cookies.expires);
-        const modData = JSON.parse(cookies.mod);
+        const userData = JSON.parse(cookies.user);
 
-        if (!token || !expires || !modData) {
+        if (!token || !expires || !userData) {
           throw new Error('Invalid cookie');
         }
         if (expires < Date.now()) {
           throw new Error('Invalid cookie');
         }
 
-        context.commit('api/setModData', modData);
+        context.commit('api/setUserData', userData);
         context.commit('api/setSessionData', { token, expires });
       } catch (error) {
-        context.commit('api/setModData', null);
+        context.commit('api/setUserData', null);
         context.commit('api/setSessionData', null);
         if (host.startsWith('mod.')) {
           redirect('/login/');
@@ -129,7 +144,7 @@ export const actions = {
       }
     } else {
       // No cookies.
-      context.commit('api/setModData', null);
+      context.commit('api/setUserData', null);
       context.commit('api/setSessionData', null);
     }
   },

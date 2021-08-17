@@ -29,6 +29,7 @@
       :post="rootPost"
       :thread="thread"
       :show-replies="showReplies"
+      :root-author-id="rootPost.authorId"
       class="m-5"
     >
       <slot></slot>

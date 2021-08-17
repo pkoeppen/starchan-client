@@ -13,6 +13,7 @@
             v-if="data.ipAddress"
             :to="`/dashboard/ip/${data.ipAddress}/`"
             class="font-mono hover:underline focus:underline"
+            @click.native="hideModal({ modal: 'deletePost' })"
           >
             {{ data.ipAddress }}
           </nuxt-link>
@@ -21,24 +22,24 @@
       </div>
 
       <!-- Delete All Posts By IP Checkbox -->
-      <label for="deleteOnBoard" class="check-field mb-2">
+      <label for="deletePost-deleteOnBoard" class="check-field mb-2">
         <span>Delete all posts by this IP on /{{ data.boardId }}/</span>
         <input
-          id="deleteOnBoard"
+          id="deletePost-deleteOnBoard"
           v-model="form.deleteOnBoard"
           type="checkbox"
-          name="deleteOnBoard"
+          name="deletePost-deleteOnBoard"
         />
       </label>
 
       <!-- Delete All Posts By IP On This Board Checkbox -->
-      <label for="deleteOnAllBoards" class="check-field">
+      <label for="deletePost-deleteOnAllBoards" class="check-field">
         <span>Delete all posts by this IP on all boards</span>
         <input
-          id="deleteOnAllBoards"
+          id="deletePost-deleteOnAllBoards"
           v-model="form.deleteOnAllBoards"
           type="checkbox"
-          name="deleteOnAllBoards"
+          name="deletePost-deleteOnAllBoards"
         />
       </label>
 
@@ -52,7 +53,7 @@
       </div>
 
       <!-- Submit -->
-      <div class="flex justify-center relative z-40">
+      <div class="flex justify-center">
         <button
           type="submit"
           icon="fas fa-paper-plane"
@@ -81,7 +82,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapMutations, mapState } from 'vuex';
 export default {
   data() {
     return {
@@ -95,12 +96,27 @@ export default {
   computed: {
     ...mapState({
       data: (state) => state.modals.deletePost.data,
+      visible: (state) => state.modals.deletePost.visible,
     }),
     isThread() {
       return this.data.postId === this.data.threadId;
     },
   },
+  watch: {
+    visible(newVal) {
+      if (newVal === false) {
+        this.resetForm();
+      }
+    },
+  },
   methods: {
+    ...mapMutations(['hideModal']),
+    resetForm() {
+      this.form = {
+        deleteOnBoard: false,
+        deleteOnAllBoards: false,
+      };
+    },
     async submit() {
       this.loading = true;
       try {
@@ -113,11 +129,13 @@ export default {
           },
         });
 
-        this.form = {};
+        this.resetForm();
 
-        // Close modal and navigate to the new thread.
+        // Close the modal.
         this.hideModal({ modal: 'deletePost' });
 
+        // If the post was a thread root and we're in the thread,
+        // navigate back to the board.
         if (
           this.isThread &&
           this.$route.path ===

@@ -280,8 +280,7 @@ export default {
     async submit() {
       this.loading = true;
       try {
-        await this.$recaptcha.init();
-        const recaptcha = await this.$recaptcha.execute('createThread');
+        const recaptcha = await this.$recaptcha.execute('addThread');
         const formData = new FormData();
         for (const key in this.form) {
           const value = this.form[key];
@@ -312,7 +311,6 @@ export default {
         console.error(error);
       } finally {
         this.loading = false;
-        this.$recaptcha.destroy();
       }
     },
   },

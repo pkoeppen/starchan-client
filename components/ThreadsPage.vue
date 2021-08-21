@@ -38,9 +38,7 @@
                   thread._count.posts === 1 ? 'y' : 'ies'
                 }}</span
               >
-              <span class="flex-grow">{{
-                $timeAgo(thread.lastPost.updatedAt)
-              }}</span>
+              <span class="flex-grow">{{ $timeAgo(thread.bumpedAt) }}</span>
               <i class="opacity-0 group-hover:opacity-100 fas fa-angle-right" />
             </nuxt-link>
           </thread-preview>

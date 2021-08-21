@@ -205,6 +205,15 @@ export const actions = {
       .then(({ data }) => data)
       .catch(this.$catch);
   },
+
+  /*
+   * Starts a chat room with the given author ID.
+   */
+  startChat(context, { recaptcha, formData }) {
+    return this.$axios
+      .put(`/chat?recaptcha=${recaptcha}`, formData)
+      .then(({ data }) => data);
+  },
 };
 
 export const mutations = {

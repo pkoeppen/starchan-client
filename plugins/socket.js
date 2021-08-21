@@ -6,7 +6,7 @@ const socket = io.connect(`http://local.starchan.org:3002`, {
 
 // Dev logger.
 socket.onAny((event, ...args) => {
-  console.log(event, args);
+  console.log(`dev: ${event}:`, JSON.stringify(args, null, 2));
 });
 
 export default function (context, inject) {

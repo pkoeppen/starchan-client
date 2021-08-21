@@ -50,21 +50,10 @@
       >
         <i class="w-3 fas fa-project-diagram" />
         <span class="flex-grow">Chat</span>
-        <div
-          class="
-            h-4
-            w-4
-            bg-red-500
-            text-white text-xs
-            font-display font-bold
-            rounded
-            flex
-            items-center
-            justify-center
-          "
-        >
-          5
-        </div>
+        <unread-chat-count
+          v-if="unreadChatMessageCount"
+          :count="unreadChatMessageCount"
+        />
       </nuxt-link>
 
       <!-- Archive -->
@@ -105,8 +94,12 @@
 
 <script>
 import { mapState } from 'vuex';
-
 export default {
+  data() {
+    return {
+      unreadChatMessageCount: 0,
+    };
+  },
   computed: {
     ...mapState(['modRoute']),
     boardId() {
@@ -122,9 +115,26 @@ export default {
       return false;
     },
   },
-  created() {
-    // console.log('connecting');
-    // this.$socket.connect();
+  mounted() {
+    this.$socket.on('total unread', this.totalUnreadListener);
+    this.$socket.on('incr total unread', this.incrTotalUnreadListener);
+    this.$socket.emit('total unread');
+  },
+  beforeDestroy() {
+    this.$socket.off('total unread', this.totalUnreadListener);
+    this.$socket.off('incr total unread', this.incrTotalUnreadListener);
+  },
+  methods: {
+    totalUnreadListener({ count }) {
+      this.unreadChatMessageCount = count;
+    },
+    incrTotalUnreadListener({ roomId, count }) {
+      // If we are already in this room, don't update the "unread" count.
+      if (this.$route.params.roomId === roomId) {
+        return;
+      }
+      this.unreadChatMessageCount += count;
+    },
   },
 };
 </script>

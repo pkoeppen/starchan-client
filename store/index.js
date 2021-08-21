@@ -52,6 +52,11 @@ export const state = () => ({
       visible: false,
       data: {},
     },
+    // "Start chat" modal.
+    startChat: {
+      visible: false,
+      data: {},
+    },
   },
   mainScrollElement: null,
   sidebarScrollElement: null,

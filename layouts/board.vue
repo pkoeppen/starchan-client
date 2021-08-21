@@ -7,6 +7,7 @@
     <modal-report-post />
     <modal-ban-post />
     <modal-edit-thread />
+    <modal-start-chat />
 
     <!-- Sidebar -->
     <sidebar />
@@ -40,9 +41,11 @@ export default {
   },
   mounted() {
     this.$recaptcha.init();
+    this.$socket.connect();
   },
   beforeDestroy() {
     this.$recaptcha.destroy();
+    this.$socket.disconnect();
   },
 };
 </script>

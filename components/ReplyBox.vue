@@ -34,7 +34,15 @@
       </div>
 
       <div class="flex space-x-2">
-        <div class="flex flex-col justify-end">
+        <!-- Column 1 -->
+        <div class="flex flex-col justify-between">
+          <small-button
+            v-show="showAdditionalFields"
+            :icon="
+              form.sage ? 'text-green-500 fas fa-seedling' : 'fas fa-seedling'
+            "
+            @click.native="form.sage = !form.sage"
+          />
           <small-button
             :icon="
               showAdditionalFields ? 'fas fa-angle-up' : 'fas fa-angle-down'
@@ -42,6 +50,8 @@
             @click.native="showAdditionalFields = !showAdditionalFields"
           />
         </div>
+
+        <!-- Column 2 -->
         <div
           class="flex-grow flex flex-col"
           :class="{ 'space-y-2': showAdditionalFields }"
@@ -71,6 +81,8 @@
             />
           </simplebar>
         </div>
+
+        <!-- Column 3 -->
         <div class="flex flex-col justify-end">
           <div class="flex">
             <div
@@ -129,6 +141,7 @@ export default {
         name: '',
         password: '',
         body: '',
+        sage: false,
       },
     };
   },

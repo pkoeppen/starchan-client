@@ -36,6 +36,7 @@
           "
           style="min-width: 8rem"
         >
+          <!-- Reply -->
           <div
             v-if="$route.path === `/${thread.boardId}/thread/${thread.id}/`"
             class="menu-item border-b"
@@ -54,9 +55,21 @@
           >
             <span>Reply</span><i class="fas fa-reply text-xs text-gray-600" />
           </nuxt-link>
+
+          <!-- Chat -->
+          <div
+            class="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b"
+            @click="showStartChatModal()"
+          >
+            <span>Chat</span>
+          </div>
+
+          <!-- Hide -->
           <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b">
             <span>Hide</span>
           </div>
+
+          <!-- Report -->
           <div
             class="menu-item border-b-2 text-red-500"
             @click="showReportPostModal()"
@@ -152,6 +165,9 @@
           @click="appendToReply(post.id)"
           >#{{ post.id }}</span
         >
+
+        <!-- Sage -->
+        <i v-if="post.sage" class="fas fa-seedling text-gray-500" />
       </div>
 
       <!-- Files -->
@@ -506,6 +522,18 @@ export default {
           cycle: this.thread.cycle,
           archived: this.thread.archived,
           willArchive: this.thread.willArchive,
+        },
+      });
+      this.showPostMenu = false;
+    },
+    showStartChatModal() {
+      this.showModal({
+        modal: 'startChat',
+        data: {
+          authorTagColor: this.authorTagColor,
+          authorId: this.post.authorId,
+          threadId: this.thread.id,
+          boardId: this.thread.boardId,
         },
       });
       this.showPostMenu = false;

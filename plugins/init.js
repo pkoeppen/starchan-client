@@ -20,7 +20,7 @@ export default async function ({ store }, inject) {
 
   inject('identicon', (str, options = {}) => {
     try {
-      const identicon = new Identicon(str, {
+      const identicon = new Identicon(str.padEnd(15, str), {
         margin: 0.2,
         size: 32,
         format: 'svg',

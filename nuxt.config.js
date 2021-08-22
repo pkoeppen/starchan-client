@@ -9,7 +9,7 @@ export default {
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
   publicRuntimeConfig: {
-    baseDataUrl: 'https://s3.amazonaws.com/data.starchan.org',
+    baseDataUrl: getBaseDataUrl(),
   },
   router: {
     middleware: ['auth'],
@@ -33,13 +33,15 @@ export default {
   modules: ['@nuxtjs/axios', '@nuxtjs/pwa', '@nuxtjs/recaptcha'],
   recaptcha: {
     hideBadge: true,
-    siteKey:
-      '6LcD-tcUAAAAAGDzZoPmqTrPkXLQgixHGIWhc5v1' ||
-      process.env.RECAPTCHA_PUBLIC_KEY, // todo
+    siteKey: '6LcD-tcUAAAAAGDzZoPmqTrPkXLQgixHGIWhc5v1',
     version: 3,
   },
   axios: {
-    baseURL: 'http://local.starchan.org:3001',
+    // The host 'starchan-server' is set by Docker.
+    // When making a server-side request, stay within the VPC
+    // instead of sending the request out and back in again.
+    baseURL: 'http://starchan-server:3001',
+    browserBaseURL: getBrowserBaseUrl(),
     credentials: true,
     init(axios) {
       axios.defaults.withCredentials = true;
@@ -47,4 +49,41 @@ export default {
   },
   content: {},
   build: {},
+  server: {
+    host: '0.0.0.0',
+    port: 3000,
+  },
+  watchers: {
+    webpack: {
+      aggregateTimeout: 300,
+      poll: 1000
+    }
+  },
 };
+
+function getBrowserBaseUrl() {
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  switch (process.env.NODE_ENV) {
+    case 'production':
+      return 'https://api.starchan.org';
+    case 'development':
+      return 'https://api-dev.starchan.org';
+    case 'local':
+      return 'http://local.starchan.org:3001';
+    default:
+      throw new Error('Invalid NODE_ENV. Could not set base browser API URL');
+  }
+}
+
+function getBaseDataUrl() {
+  switch (process.env.NODE_ENV) {
+    case 'production':
+      return 'https://data.starchan.org';
+    case 'development':
+      return 'https://s3.amazonaws.com/data.starchan.org'; // todo
+    case 'local':
+      return 'https://s3.amazonaws.com/data.starchan.org'; // todo
+    default:
+      throw new Error('Invalid NODE_ENV. Could not set base data URL');
+  }
+}

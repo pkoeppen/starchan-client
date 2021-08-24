@@ -94,10 +94,7 @@
             </tr>
           </template>
           <tr v-else>
-            <td
-              class="font-display font-bold text-gray-700 text-center py-6"
-              colspan="8"
-            >
+            <td class="font-display text-gray-300 text-center py-6" colspan="8">
               No bans to display.
             </td>
           </tr>

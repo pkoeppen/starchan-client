@@ -45,10 +45,7 @@
             </tr>
           </template>
           <tr v-else>
-            <td
-              class="font-display font-bold text-gray-700 text-center py-6"
-              colspan="5"
-            >
+            <td class="font-display text-gray-300 text-center py-6" colspan="5">
               No log entries to display.
             </td>
           </tr>

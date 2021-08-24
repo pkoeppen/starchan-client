@@ -9,7 +9,16 @@ export default {
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
   publicRuntimeConfig: {
-    baseDataUrl: getBaseDataUrl(),
+    socketUrl: process.env.SOCKET_URL,
+    baseDataUrl: process.env.DATA_URL,
+    axios: {
+      browserBaseURL: process.env.BROWSER_BASE_URL,
+    },
+  },
+  privateRuntimeConfig: {
+    axios: {
+      baseURL: process.env.BASE_URL,
+    },
   },
   router: {
     middleware: ['auth'],
@@ -37,11 +46,6 @@ export default {
     version: 3,
   },
   axios: {
-    // The host 'starchan-server' is set by Docker.
-    // When making a server-side request, stay within the VPC
-    // instead of sending the request out and back in again.
-    baseURL: 'http://starchan-server:3001',
-    browserBaseURL: getBrowserBaseUrl(),
     credentials: true,
     init(axios) {
       axios.defaults.withCredentials = true;
@@ -56,34 +60,7 @@ export default {
   watchers: {
     webpack: {
       aggregateTimeout: 300,
-      poll: 1000
-    }
+      poll: 1000,
+    },
   },
 };
-
-function getBrowserBaseUrl() {
-  console.log('NODE_ENV:', process.env.NODE_ENV);
-  switch (process.env.NODE_ENV) {
-    case 'production':
-      return 'https://api.starchan.org';
-    case 'development':
-      return 'https://api-dev.starchan.org';
-    case 'local':
-      return 'http://local.starchan.org:3001';
-    default:
-      throw new Error('Invalid NODE_ENV. Could not set base browser API URL');
-  }
-}
-
-function getBaseDataUrl() {
-  switch (process.env.NODE_ENV) {
-    case 'production':
-      return 'https://data.starchan.org';
-    case 'development':
-      return 'https://s3.amazonaws.com/data.starchan.org'; // todo
-    case 'local':
-      return 'https://s3.amazonaws.com/data.starchan.org'; // todo
-    default:
-      throw new Error('Invalid NODE_ENV. Could not set base data URL');
-  }
-}

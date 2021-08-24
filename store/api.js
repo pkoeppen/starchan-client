@@ -237,7 +237,12 @@ export const mutations = {
  * Deletes a cookie.
  */
 function clearCookie(name) {
-  const domain = 'local.starchan.org'; // TODO - change this for prod
   const expiry = +new Date(0);
+  // sub.domain.com:3000 -> domain.com
+  const domain = window.location.host
+    .split(':')[0]
+    .split('.')
+    .slice(-2)
+    .join('.');
   document.cookie = `${name}=; expires=${expiry}; domain=${domain}; path=/`;
 }

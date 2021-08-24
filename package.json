@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "cross-env NODE_ENV=local nuxt",
+    "dev": "nuxt",
     "start": "nuxt start"
 
   },

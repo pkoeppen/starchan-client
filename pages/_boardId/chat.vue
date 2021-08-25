@@ -80,33 +80,20 @@ export default {
   },
   computed: {
     roomsOnThisBoard() {
-      return this.buildRoomList(
+      return this.roomList(
         this.rooms.filter((room) => room.boardId === this.boardId)
       );
     },
     roomsOnOtherBoards() {
-      return this.buildRoomList(
+      return this.roomList(
         this.rooms.filter((room) => room.boardId !== this.boardId)
       );
     },
     noRoomsToDisplay() {
       return !this.roomsOnThisBoard.length && !this.roomsOnOtherBoards.length;
     },
-  },
-  mounted() {
-    this.$socket.on('rooms', this.roomsListener);
-    this.$socket.on('reset unread', this.resetUnreadListener);
-    this.$socket.on('new unread', this.newUnreadListener);
-    this.$socket.emit('rooms');
-  },
-  beforeDestroy() {
-    this.$socket.off('rooms', this.roomsListener);
-    this.$socket.off('reset unread', this.resetUnreadListener);
-    this.$socket.off('incr unread', this.incrUnreadListener);
-  },
-  methods: {
-    buildRoomList(rooms) {
-      return rooms.map((room) => {
+    roomList() {
+      return this.rooms.map((room) => {
         for (const participant of room.participants) {
           participant.identicon = this.$identicon(participant.authorId);
           participant.identiconSrc = `data:image/svg+xml;base64,${participant.identicon?.toString()}`;
@@ -117,6 +104,20 @@ export default {
         return room;
       });
     },
+  },
+  mounted() {
+    this.$socket.on('rooms', this.roomsListener);
+    this.$socket.on('reset unread', this.resetUnreadListener);
+    this.$socket.on('new unread', this.newUnreadListener);
+    this.$socket.on('user disconnected', this.userDisconnectedListener);
+    this.$socket.emit('rooms');
+  },
+  beforeDestroy() {
+    this.$socket.off('rooms', this.roomsListener);
+    this.$socket.off('reset unread', this.resetUnreadListener);
+    this.$socket.off('incr unread', this.incrUnreadListener);
+  },
+  methods: {
     roomsListener(rooms) {
       this.loading = false;
       this.rooms = rooms;
@@ -124,6 +125,7 @@ export default {
     resetUnreadListener({ roomId }) {
       const room = this.rooms.find((room) => room.id === roomId);
       room.unread = 0;
+      this.$forceUpdate();
     },
     incrUnreadListener({ count, roomId }) {
       // If we are already in this room, don't update the "unread" count.
@@ -132,6 +134,15 @@ export default {
       }
       const room = this.rooms.find((room) => room.id === roomId);
       room.unread += count;
+      this.$forceUpdate();
+    },
+    userDisconnectedListener({ roomId, authorId }) {
+      const room = this.rooms.find((room) => room.id === roomId);
+      const participant = room.participants.find(
+        (participant) => participant.authorId === authorId
+      );
+      participant.online = false;
+      this.$forceUpdate();
     },
   },
 };

@@ -80,14 +80,10 @@ export default {
   },
   computed: {
     roomsOnThisBoard() {
-      return this.roomList(
-        this.rooms.filter((room) => room.boardId === this.boardId)
-      );
+      return this.roomList.filter((room) => room.boardId === this.boardId);
     },
     roomsOnOtherBoards() {
-      return this.roomList(
-        this.rooms.filter((room) => room.boardId !== this.boardId)
-      );
+      return this.roomList.filter((room) => room.boardId !== this.boardId);
     },
     noRoomsToDisplay() {
       return !this.roomsOnThisBoard.length && !this.roomsOnOtherBoards.length;

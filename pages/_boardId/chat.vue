@@ -104,7 +104,8 @@ export default {
   mounted() {
     this.$socket.on('rooms', this.roomsListener);
     this.$socket.on('reset unread', this.resetUnreadListener);
-    this.$socket.on('new unread', this.newUnreadListener);
+    this.$socket.on('incr unread', this.incrUnreadListener);
+    this.$socket.on('user connected', this.userConnectedListener);
     this.$socket.on('user disconnected', this.userDisconnectedListener);
     this.$socket.emit('rooms');
   },
@@ -112,6 +113,8 @@ export default {
     this.$socket.off('rooms', this.roomsListener);
     this.$socket.off('reset unread', this.resetUnreadListener);
     this.$socket.off('incr unread', this.incrUnreadListener);
+    this.$socket.on('user connected', this.userConnectedListener);
+    this.$socket.off('user disconnected', this.userDisconnectedListener);
   },
   methods: {
     roomsListener(rooms) {
@@ -132,12 +135,24 @@ export default {
       room.unread += count;
       this.$forceUpdate();
     },
+    userConnectedListener({ roomId, authorId }) {
+      const room = this.rooms.find((room) => room.id === roomId);
+      const participant = room.participants.find(
+        (participant) => participant.authorId === authorId
+      );
+      console.log('user connected participant:', participant);
+      participant.online = true;
+      console.log(JSON.stringify(this.roomList, null, 2));
+      this.$forceUpdate();
+    },
     userDisconnectedListener({ roomId, authorId }) {
       const room = this.rooms.find((room) => room.id === roomId);
       const participant = room.participants.find(
         (participant) => participant.authorId === authorId
       );
+      console.log('user disconnected participant:', participant);
       participant.online = false;
+      console.log(JSON.stringify(this.roomList, null, 2));
       this.$forceUpdate();
     },
   },

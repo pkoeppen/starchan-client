@@ -1,12 +1,41 @@
 <template>
-  <div class="w-full flex items-center border-b h-14 pl-12">
+  <div
+    class="w-full flex items-center h-14"
+    :class="{ 'border-b': !searchResultsModalVisible }"
+  >
     <!-- Search -->
-    <div class="text-sm py-2 w-64 text-gray-400">
-      <i class="fas fa-search text-xs mr-2" /><span>Search</span>
-    </div>
+    <form
+      class="text-sm py-2 flex items-center w-3/4 px-12"
+      @submit.prevent="showSearchModal()"
+    >
+      <i class="fas fa-search text-xs mr-2 text-gray-400" />
+      <input
+        ref="searchInput"
+        v-model="searchQuery"
+        placeholder="Search..."
+        class="flex-grow placeholder-gray-400"
+        @input="handleSearchInputDebounced()"
+      />
+      <!-- <i
+        v-if="searchLoading"
+        class="fas fa-asterisk animate-spin text-gray-400"
+      /> -->
+      <div
+        v-if="showSearchResultCount"
+        class="text-gray-400 whitespace-nowrap cursor-pointer"
+        @click="showSearchModal()"
+      >
+        <b>{{ searchResultCount }}</b>
+        <span>result{{ searchResultCount === 1 ? '' : 's' }}</span>
+        <span class="mx-1 text-gray-200">|</span>
+        <span>Press</span>
+        <b>Enter</b>
+        <i class="fas fa-external-link-square-alt text-xs" />
+      </div>
+    </form>
 
     <!-- Profile / Settings -->
-    <div class="flex-grow flex items-center justify-end pr-5">
+    <div class="w-1/4 flex items-center justify-end pr-5">
       <div class="relative">
         <div
           class="
@@ -142,8 +171,9 @@
 </template>
 
 <script>
+import { debounce } from 'lodash';
 import { name, flag } from 'country-emoji';
-import { mapState } from 'vuex';
+import { mapMutations, mapState } from 'vuex';
 export default {
   data() {
     const agentData = this.$store.state.agentData;
@@ -154,6 +184,11 @@ export default {
       countryFlag: flag(agentData.loc),
       showNsfw: this.$store.state.showNsfw,
       darkMode: this.$store.state.darkMode,
+      searchLoading: false,
+      searchQuery: null,
+      searchResultCount: null,
+      searchResults: [],
+      handleSearchInputDebounced: debounce(this.handleSearchInput, 500),
     };
   },
   computed: {
@@ -162,20 +197,87 @@ export default {
       modRoute: (state) => state.modRoute,
       userData: (state) => state.api.userData || {},
     }),
+    showSearchResultCount() {
+      return this.searchQuery && !isNaN(parseInt(this.searchResultCount));
+    },
+    searchResultsModalVisible() {
+      return this.$store.state.modals.searchResults.visible;
+    },
+  },
+  watch: {
+    searchQuery(newVal) {
+      if (!newVal) {
+        this.searchResultCount = null;
+      }
+    },
+  },
+  mounted() {
+    document.addEventListener('keydown', this.focusSearchInputListener);
+  },
+  beforeDestroy() {
+    document.removeEventListener('keydown', this.focusSearchInputListener);
   },
   methods: {
+    ...mapMutations(['showModal']),
+    focusSearchInputListener(event) {
+      if (
+        event.ctrlKey &&
+        event.key === 'k' &&
+        !this.searchResultsModalVisible
+      ) {
+        event.preventDefault();
+        this.$refs.searchInput.focus();
+      }
+    },
     updateShowNsfw(value) {
       this.$store.commit('updateShowNsfw', value);
     },
     updateDarkMode(value) {
       this.$store.commit('updateDarkMode', value);
     },
+    async handleSearchInput() {
+      if (!this.searchQuery) {
+        this.searchResultCount = null;
+        this.searchResults = [];
+        return;
+      }
+      try {
+        this.searchLoading = true;
+        const { total: resultCount, results } = await this.$store.dispatch(
+          'api/search',
+          {
+            q: this.searchQuery,
+          }
+        );
+        this.searchResultCount = resultCount;
+        this.searchResults = results;
+      } catch (error) {
+        this.$catch(error);
+      } finally {
+        this.searchLoading = false;
+      }
+    },
+    showSearchModal() {
+      if (!this.searchQuery) {
+        return;
+      }
+      this.showModal({
+        modal: 'searchResults',
+        data: {
+          searchQuery: this.searchQuery,
+          searchResultCount: this.searchResultCount,
+          searchResults: this.searchResults,
+        },
+      });
+      this.searchQuery = null;
+      this.searchResultCount = null;
+    },
     async logOut() {
       try {
         await this.$store.dispatch('api/logOut');
         this.$router.push('/login/');
       } catch (error) {
-        // todo
+        this.$catch(error);
       }
     },
   },

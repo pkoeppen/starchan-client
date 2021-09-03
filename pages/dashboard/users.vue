@@ -5,8 +5,8 @@
         <thead class="bg-gray-50">
           <tr>
             <th scope="col" class="table-header">Username</th>
-            <th scope="col" class="table-header">Created</th>
             <th scope="col" class="table-header">Roles</th>
+            <th scope="col" class="table-header">Created</th>
             <th scope="col" class="py-1 text-left text-xs">
               <button
                 class="
@@ -34,7 +34,6 @@
               <td class="table-cell font-bold">
                 {{ user.username }}
               </td>
-              <td class="table-cell">{{ $timeAgo(user.createdAt) }}</td>
               <td class="px-6 py-4 flex flex-wrap items-center max-w-lg">
                 <div
                   v-for="role of user.roles"
@@ -64,6 +63,7 @@
                   >{{ role.level.toLowerCase() }}
                 </div>
               </td>
+              <td class="table-cell">{{ $timeAgo(user.createdAt) }}</td>
               <td>
                 <button
                   class="

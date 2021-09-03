@@ -18,23 +18,22 @@
       >
         <i class="fas fa-angle-left" />
       </nuxt-link>
-      <div class="overflow-x-hidden px-12 pt-2 pb-28 grid grid-cols-1 gap-6">
-        <thread-preview
-          :thread="thread"
-          :root-post="thread.rootPost"
-          show-replies
-        />
+      <div
+        class="overflow-x-hidden px-12 pt-2 grid grid-cols-1 gap-6"
+        :class="showReplyBox ? 'pb-28' : 'pb-12'"
+      >
+        <thread-preview :thread="thread" append-reply show-replies />
         <post
           v-for="post of thread.posts"
           :key="post.id"
           :post="post"
           :thread="thread"
-          :root-author-id="thread.rootPost.authorId"
+          append-reply
           show-replies
         />
       </div>
     </simplebar>
-    <reply-box :thread-id="thread.id" />
+    <reply-box v-if="showReplyBox" :thread-id="thread.id" />
   </div>
 </template>
 
@@ -55,7 +54,17 @@ export default {
       previousRoute: `/${boardId}/`,
     };
   },
+  computed: {
+    showReplyBox() {
+      return !this.thread.archived;
+    },
+  },
   mounted() {
+    if (this.$route.hash) {
+      // This fixes an issue where navigating client-side to a route with a hash
+      // ending does not scroll to the appropriate anchor.
+      location.hash = this.$route.hash;
+    }
     this.$bus.$on('appendNewPost', (post) => {
       this.thread.posts.push(post);
     });

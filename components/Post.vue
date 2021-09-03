@@ -37,24 +37,29 @@
           style="min-width: 8rem"
         >
           <!-- Reply -->
-          <div
-            v-if="$route.path === `/${thread.boardId}/thread/${thread.id}/`"
-            class="menu-item border-b"
-            @click="
-              appendToReply(post.id);
-              showPostMenu = false;
-            "
-          >
-            <span>Reply</span><i class="fas fa-reply text-xs text-gray-600" />
-          </div>
-          <nuxt-link
-            v-else
-            :to="`/${thread.boardId}/thread/${thread.id}/`"
-            class="menu-item border-b"
-            @click.native="showPostMenu = false"
-          >
-            <span>Reply</span><i class="fas fa-reply text-xs text-gray-600" />
-          </nuxt-link>
+          <template v-if="!thread.archived">
+            <div
+              v-if="
+                $route.path ===
+                `/${post.boardId}/thread/${post.threadId || post.id}/`
+              "
+              class="menu-item border-b"
+              @click="
+                appendToReply(post.id);
+                showPostMenu = false;
+              "
+            >
+              <span>Reply</span><i class="fas fa-reply text-xs text-gray-600" />
+            </div>
+            <nuxt-link
+              v-else
+              :to="`/${post.boardId}/thread/${post.threadId || post.id}/`"
+              class="menu-item border-b"
+              @click.native="showPostMenu = false"
+            >
+              <span>Reply</span><i class="fas fa-reply text-xs text-gray-600" />
+            </nuxt-link>
+          </template>
 
           <!-- Chat -->
           <div
@@ -161,9 +166,17 @@
 
         <!-- Post ID -->
         <span
+          v-if="appendReply"
           class="text-blue-500 text-xs hover:underline cursor-pointer"
           @click="appendToReply(post.id)"
           >#{{ post.id }}</span
+        >
+        <nuxt-link
+          v-else
+          class="text-blue-500 text-xs hover:underline cursor-pointer"
+          :to="postAnchorLink"
+          @click.native="hideModal({ modal: 'searchResults' })"
+          >#{{ post.id }}</nuxt-link
         >
 
         <!-- Sage -->
@@ -281,6 +294,7 @@
                 'filter blur-md': isHidden(file),
               }"
               :src="`${baseDataUrl}/thumbs/${file.id}`"
+              @error="setPlaceholderImage($event)"
             />
             <div
               v-if="isHidden(file)"
@@ -313,7 +327,7 @@
       </div>
 
       <!-- Post Body -->
-      <div v-if="post.bodyHtml" class="space-y-2" v-html="post.bodyHtml" />
+      <div v-if="post.bodyHtml" class="space-y-2 mr-6" v-html="post.bodyHtml" />
 
       <div
         v-if="post.bannedForThisPost"
@@ -324,7 +338,7 @@
 
       <!-- References -->
       <div
-        v-if="showReplies && post.referencedBy.length"
+        v-if="showReplies && post.referencedBy && post.referencedBy.length"
         class="flex flex-wrap mt-3"
       >
         <a
@@ -355,13 +369,15 @@ export default {
     },
     thread: {
       type: Object,
-      required: true,
-    },
-    rootAuthorId: {
-      type: String,
-      required: true,
+      required: false,
+      default: () => ({}),
     },
     showReplies: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    appendReply: {
       type: Boolean,
       required: false,
       default: false,
@@ -387,10 +403,13 @@ export default {
   computed: {
     ...mapState(['modRoute']),
     isOp() {
-      return this.rootAuthorId === this.post.authorId;
+      return (
+        !this.post.threadId ||
+        this.thread?.rootPost?.authorId === this.post.authorId
+      );
     },
     isRootPost() {
-      return this.post.id === this.thread.id;
+      return this.post.id === this.post.threadId;
     },
     isModPost() {
       return !!this.post.user;
@@ -436,9 +455,19 @@ export default {
       }
       return null;
     },
+    postAnchorLink() {
+      return `/${this.post.boardId}/thread/${
+        this.post.threadId
+          ? this.post.threadId + '/#' + this.post.id
+          : this.post.id + '/'
+      }`;
+    },
   },
   methods: {
-    ...mapMutations(['showModal']),
+    ...mapMutations(['showModal', 'hideModal']),
+    setPlaceholderImage(event) {
+      event.target.src = `https://via.placeholder.com/150`;
+    },
     formatPostTime(time) {
       return format(new Date(time), 'MMMM d, yyyy p');
     },
@@ -466,7 +495,8 @@ export default {
     },
     replyHandler(event, postId) {
       if (
-        this.$route.path === `/${this.thread.boardId}/thread/${this.thread.id}/`
+        this.$route.path ===
+        `/${this.post.boardId}/thread/${this.post.threadId}/`
       ) {
         // If we're already on the thread page, append the post ID to the reply box.
         // Otherwise, let the link click event navigate to the thread page.
@@ -480,8 +510,8 @@ export default {
         modal: 'deletePost',
         data: {
           postId: this.post.id,
-          threadId: this.thread.id,
-          boardId: this.thread.boardId,
+          threadId: this.post.threadId,
+          boardId: this.post.boardId,
           ipAddress: this.post.ipAddress,
         },
       });
@@ -492,8 +522,8 @@ export default {
         modal: 'reportPost',
         data: {
           postId: this.post.id,
-          threadId: this.thread.id,
-          boardId: this.thread.boardId,
+          threadId: this.post.threadId,
+          boardId: this.post.boardId,
           ipAddress: this.post.ipAddress,
         },
       });
@@ -504,8 +534,8 @@ export default {
         modal: 'banPost',
         data: {
           postId: this.post.id,
-          threadId: this.thread.id,
-          boardId: this.thread.boardId,
+          threadId: this.post.threadId,
+          boardId: this.post.boardId,
           ipAddress: this.post.ipAddress,
         },
       });
@@ -515,7 +545,8 @@ export default {
       this.showModal({
         modal: 'editThread',
         data: {
-          threadId: this.thread.id,
+          boardId: this.post.boardId,
+          threadId: this.post.threadId,
           sticky: this.thread.sticky,
           locked: this.thread.locked,
           anchored: this.thread.anchored,
@@ -532,8 +563,8 @@ export default {
         data: {
           authorTagColor: this.authorTagColor,
           authorId: this.post.authorId,
-          threadId: this.thread.id,
-          boardId: this.thread.boardId,
+          threadId: this.post.threadId,
+          boardId: this.post.boardId,
         },
       });
       this.showPostMenu = false;

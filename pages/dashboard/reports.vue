@@ -4,12 +4,11 @@
       <table class="w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th scope="col" class="table-header">Report ID</th>
-            <th scope="col" class="table-header">Created</th>
             <th scope="col" class="table-header">Board</th>
             <th scope="col" class="table-header">Post ID</th>
             <th scope="col" class="table-header">Reason</th>
             <th scope="col" class="table-header">IP Address</th>
+            <th scope="col" class="table-header">Created</th>
             <th scope="col" class="table-header">
               <span class="sr-only">Edit</span>
             </th>
@@ -18,8 +17,6 @@
         <tbody class="bg-white divide-y divide-gray-200">
           <template v-if="reports.length">
             <tr v-for="report of reports" :key="report.id">
-              <td class="table-cell font-bold">{{ report.id }}</td>
-              <td class="table-cell">{{ $timeAgo(report.createdAt) }}</td>
               <td class="table-cell">
                 <nuxt-link
                   :to="`/${report.boardId}/`"
@@ -44,6 +41,7 @@
                   >{{ report.ipAddress }}</nuxt-link
                 >
               </td>
+              <td class="table-cell">{{ $timeAgo(report.createdAt) }}</td>
               <td class="">
                 <button
                   class="

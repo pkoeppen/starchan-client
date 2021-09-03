@@ -128,7 +128,7 @@
 export default {
   props: {
     threadId: {
-      type: Number,
+      type: String,
       required: true,
     },
   },

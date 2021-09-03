@@ -27,6 +27,7 @@
 
       <!-- Message Input -->
       <input
+        ref="messageInput"
         v-model="form.message"
         class="rounded px-2 py-1 border-2 w-full mb-6"
         placeholder="Type your message..."
@@ -87,7 +88,9 @@ export default {
   },
   watch: {
     visible(newVal) {
-      if (newVal === false) {
+      if (newVal) {
+        setTimeout(() => this.$refs.messageInput.focus(), 0);
+      } else {
         this.resetForm();
       }
     },
@@ -116,9 +119,15 @@ export default {
         });
 
         this.$socket.emit('refresh');
-        this.resetForm();
-        this.hideModal({ modal: 'startChat' });
-        this.$router.push(`/${this.data.boardId}/chat/${roomId}/`);
+
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            this.$router.push(`/${this.data.boardId}/chat/${roomId}/`);
+            this.hideModal({ modal: 'startChat' });
+            this.resetForm();
+            resolve();
+          }, 100);
+        });
       } catch (error) {
         this.$catch(error);
       } finally {

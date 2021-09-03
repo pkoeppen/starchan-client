@@ -129,31 +129,32 @@ export default {
     incrUnreadListener({ count, roomId }) {
       // If we are already in this room, don't update the "unread" count.
       if (this.$route.params.roomId === roomId) {
+        this.$socket.emit('reset unread', { roomId });
         return;
       }
       const room = this.rooms.find((room) => room.id === roomId);
       room.unread += count;
       this.$forceUpdate();
     },
-    userConnectedListener({ roomId, authorId }) {
-      const room = this.rooms.find((room) => room.id === roomId);
-      const participant = room.participants.find(
-        (participant) => participant.authorId === authorId
-      );
-      console.log('user connected participant:', participant);
-      participant.online = true;
-      console.log(JSON.stringify(this.roomList, null, 2));
-      this.$forceUpdate();
+    userConnectedListener(data) {
+      this.setUserOnline(true, data);
     },
-    userDisconnectedListener({ roomId, authorId }) {
-      const room = this.rooms.find((room) => room.id === roomId);
-      const participant = room.participants.find(
-        (participant) => participant.authorId === authorId
-      );
-      console.log('user disconnected participant:', participant);
-      participant.online = false;
-      console.log(JSON.stringify(this.roomList, null, 2));
-      this.$forceUpdate();
+    userDisconnectedListener(data) {
+      this.setUserOnline(false, data);
+    },
+    setUserOnline(value, { roomId, authorId }) {
+      const index = this.rooms.findIndex((room) => room.id === roomId);
+      if (index >= 0) {
+        const room = { ...this.rooms[index] };
+        const participant = room.participants.find(
+          (participant) => participant.authorId === authorId
+        );
+        if (participant) {
+          participant.online = value;
+          this.$set(this.rooms, index, room);
+          this.$forceUpdate();
+        }
+      }
     },
   },
 };

@@ -4,7 +4,6 @@
       <table class="w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th scope="col" class="table-header">Log ID</th>
             <th scope="col" class="table-header">User</th>
             <th scope="col" class="table-header">Message</th>
             <th scope="col" class="table-header">Created</th>
@@ -14,9 +13,6 @@
         <tbody class="bg-white divide-y divide-gray-200">
           <template v-if="logEntries.length">
             <tr v-for="logEntry of logEntries" :key="logEntry.id">
-              <td class="table-cell font-bold">
-                {{ logEntry.id }}
-              </td>
               <td class="table-cell font-bold">{{ logEntry.user.username }}</td>
               <td class="table-cell">{{ logEntry.message }}</td>
               <td class="table-cell">{{ $timeAgo(logEntry.createdAt) }}</td>

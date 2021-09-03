@@ -144,37 +144,45 @@ export default {
     visible(newVal) {
       if (newVal === true) {
         this.form = {
-          sticky: false,
-          locked: false,
-          anchored: false,
-          cycle: false,
-          archived: false,
-          willArchive: false,
+          sticky: this.data.sticky,
+          locked: this.data.locked,
+          anchored: this.data.anchored,
+          cycle: this.data.cycle,
+          archived: this.data.archived,
+          willArchive: this.data.willArchive,
         };
       }
     },
   },
   methods: {
     ...mapMutations(['hideModal']),
+    resetForm() {
+      this.form = {
+        sticky: false,
+        locked: false,
+        anchored: false,
+        cycle: false,
+        archived: false,
+        willArchive: false,
+      };
+    },
     async submit() {
       this.loading = true;
       try {
         // Send the request.
-        await this.$store.dispatch('api/editThread', {
-          postId: this.data.postId,
-          formData: {
-            ...this.form,
-            boardId: this.data.boardId,
-          },
+        await this.$store.dispatch('api/updateThread', {
+          boardId: this.data.boardId,
+          threadId: this.data.threadId,
+          formData: this.form,
         });
 
+        // Reset the form.
         this.resetForm();
 
         // Close the modal.
         this.hideModal({ modal: 'editThread' });
       } catch (error) {
-        // TODO: show a toast message or something
-        console.error(error);
+        this.$catch(error);
       } finally {
         this.loading = false;
       }

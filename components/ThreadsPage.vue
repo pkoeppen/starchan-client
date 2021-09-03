@@ -11,7 +11,6 @@
             v-for="thread of threads"
             :key="thread.id"
             :thread="thread"
-            :root-post="thread.rootPost"
           >
             <!-- Replies -->
             <nuxt-link

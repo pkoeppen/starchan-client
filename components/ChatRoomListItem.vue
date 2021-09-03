@@ -10,8 +10,8 @@
     <!-- Avatar -->
     <div class="rounded bg-gray-200 w-9 h-9 mr-3 flex-shrink-0 overflow-hidden">
       <img
-        v-show="participants[0].identicon"
-        :src="participants[0].identiconSrc"
+        v-show="showIdenticon"
+        :src="identiconSrc"
         class="w-full h-full object-cover"
       />
     </div>
@@ -54,6 +54,12 @@ export default {
     return { boardId };
   },
   computed: {
+    showIdenticon() {
+      return !!this.participants[0]?.identicon;
+    },
+    identiconSrc() {
+      return this.participants[0]?.identiconSrc;
+    },
     participants() {
       return this.room.participants.filter(
         (p) => p.authorId !== this.room.myAuthorId

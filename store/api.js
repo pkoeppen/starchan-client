@@ -49,6 +49,24 @@ export const actions = {
   },
 
   /*
+   * Lists (up to 10) sticky threads.
+   */
+  listStickyThreads(context, { boardId, take }) {
+    return this.$axios
+      .get(`/threads/${boardId}/sticky`, { params: { take } })
+      .then(({ data }) => data);
+  },
+
+  /*
+   * Lists the latest 10 threads.
+   */
+  listLatestThreads(context, { boardId, take }) {
+    return this.$axios
+      .get(`/threads/${boardId}/latest`, { params: { take }, progress: false })
+      .then(({ data }) => data);
+  },
+
+  /*
    * Gets multiple threads.
    */
   getThreads(context, { boardId, ...params }) {
@@ -69,6 +87,16 @@ export const actions = {
   },
 
   /*
+   * Gets multiple posts.
+   */
+  getPosts(context, { boardId, ...params }) {
+    return this.$axios
+      .get(`/posts/${boardId}`, { params })
+      .then(({ data }) => data)
+      .catch(this.$catch);
+  },
+
+  /*
    * Adds a post reply to the given thread.
    */
   addPost(context, { recaptcha, formData }) {
@@ -78,6 +106,16 @@ export const actions = {
           'Content-Type': 'multipart/form-data',
         },
       })
+      .then(({ data }) => data)
+      .catch(this.$catch);
+  },
+
+  /*
+   * Searches posts by text.
+   */
+  search(context, params) {
+    return this.$axios
+      .get(`/search`, { params, progress: false }, { progress: false })
       .then(({ data }) => data)
       .catch(this.$catch);
   },
@@ -134,6 +172,15 @@ export const actions = {
       })
       .then(({ data }) => data)
       .catch(this.$catch);
+  },
+
+  /*
+   * Updates a thread by ID.
+   */
+  updateThread(context, { boardId, threadId, formData }) {
+    return this.$axios
+      .post(`/threads/${boardId}/${threadId}`, formData)
+      .then(({ data }) => data);
   },
 
   /*

@@ -20,7 +20,7 @@
     <!-- Pagination Controls -->
     <div class="flex items-center justify-center">
       <nuxt-link
-        :to="`/${boardId}/${previousPage}/`"
+        :to="`/${boardId}${isArchive ? '/archive' : ''}/${previousPage}/`"
         class="
           mr-3
           rounded-sm
@@ -52,11 +52,11 @@
           font-bold font-display
           text-gray-500 text-sm
         "
-        :to="`/${boardId}/${n}/`"
+        :to="`/${boardId}${isArchive ? '/archive' : ''}/${n}/`"
         >{{ n }}</nuxt-link
       >
       <nuxt-link
-        :to="`/${boardId}/${nextPage}/`"
+        :to="`/${boardId}${isArchive ? '/archive' : ''}/${nextPage}/`"
         class="
           ml-3
           rounded-sm
@@ -116,6 +116,9 @@ export default {
       } else {
         return this.page - 1;
       }
+    },
+    isArchive() {
+      return this.$route.path.includes('archive');
     },
   },
   methods: {

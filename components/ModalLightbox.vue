@@ -6,7 +6,7 @@
     <!-- Overlay -->
     <div
       class="absolute inset-0 z-30"
-      @click="hideModal({ modal: 'lightbox' })"
+      @click="hideModal({ modal: 'lightbox', data: {} })"
     />
 
     <!-- Image Viewer -->
@@ -22,46 +22,78 @@
           justify-center
         "
       >
-        <!-- Close Modal -->
+        <!-- Loading -->
         <div
-          class="flex items-center justify-end z-40 mr-1 lg:mr-0"
-          style="height: 30px"
-          :class="controlsClass"
-        >
-          <i
-            class="fas fa-times cursor-pointer text-gray-300 hover:text-white"
-            @click="hideModal({ modal: 'lightbox' })"
-          />
-        </div>
-        <!-- Image -->
-        <img
-          ref="image"
-          :src="imageSource"
-          :style="imageStyle"
-          class="object-contain"
-        />
-        <!-- Location -->
-        <div
+          v-if="loading"
           class="
+            absolute
+            inset-0
             flex
             items-center
-            justify-end
-            z-40
-            text-xs text-gray-300
-            mr-1
-            lg:mr-0
-            space-x-3
+            justify-center
+            text-center text-white
           "
-          style="height: 30px"
-          :class="controlsClass"
         >
-          <span
-            >{{ selected.filename }} ({{
-              readableFileSize(selected.size)
-            }})</span
-          >
-          <span>{{ index + 1 }} / {{ files.length }}</span>
+          <i class="animate-spin fa fa-asterisk fa-2x" />
         </div>
+
+        <!-- Not Found -->
+        <div v-if="selected.notFound" class="text-center">
+          <div class="text-white font-display">File not found</div>
+          <div class="text-xs text-gray-300">
+            {{ index + 1 }} / {{ files.length }}
+          </div>
+        </div>
+
+        <template v-else-if="files.length">
+          <!-- Close Modal -->
+          <div
+            v-show="!loading"
+            class="flex items-center justify-end z-40 mr-1 lg:mr-0"
+            style="height: 30px"
+            :class="controlsClass"
+          >
+            <i
+              class="fas fa-times cursor-pointer text-gray-300 hover:text-white"
+              @click="hideModal({ modal: 'lightbox', data: {} })"
+            />
+          </div>
+
+          <!-- Image -->
+          <img
+            ref="image"
+            :src="imageSource"
+            :style="imageStyle"
+            class="object-contain"
+            @load="onImageLoad()"
+            @error="setNotFound()"
+            @change="alert('changed')"
+          />
+
+          <!-- Location -->
+          <div
+            v-show="!loading"
+            class="
+              flex
+              items-center
+              justify-end
+              z-40
+              text-xs text-gray-300
+              mr-1
+              lg:mr-0
+              space-x-3
+            "
+            style="height: 30px"
+            :class="controlsClass"
+          >
+            <span
+              >{{ selected.filename }} ({{
+                readableFileSize(selected.size)
+              }})</span
+            >
+            <span>{{ index + 1 }} / {{ files.length }}</span>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -85,11 +117,13 @@
 
 <script>
 import { mapState, mapMutations } from 'vuex';
+import { cloneDeep } from 'lodash';
 import filesize from 'filesize';
 
 export default {
   data() {
     return {
+      loading: false,
       baseDataUrl: this.$config.baseDataUrl,
       imageStyle: '',
       controlsClass: '',
@@ -101,7 +135,10 @@ export default {
       data: (state) => state.modals.lightbox.data,
     }),
     files() {
-      return this.data.files || [];
+      return (this.data.files || []).map((file) => ({
+        loading: true,
+        ...file,
+      }));
     },
     index() {
       return this.data.index || 0;
@@ -118,14 +155,15 @@ export default {
   watch: {
     visible() {
       if (this.visible) {
+        this.loading = true;
         document.documentElement.style.overflow = 'hidden';
       } else {
+        this.loading = false;
         document.documentElement.style.overflow = 'auto';
       }
     },
   },
   mounted() {
-    this.onResize(); // Adjust image container size on page load.
     window.addEventListener('resize', this.onResize);
   },
   beforeDestroy() {
@@ -133,21 +171,44 @@ export default {
   },
   methods: {
     ...mapMutations(['setModalData', 'showModal', 'hideModal']),
+    onImageLoad() {
+      this.onResize();
+      this.loading = false;
+    },
+    setNotFound() {
+      const files = cloneDeep(this.files);
+      const file = files[this.index];
+      if (file) {
+        file.notFound = true;
+        this.setModalData({
+          modal: 'lightbox',
+          data: { files },
+        });
+      }
+      this.loading = false;
+    },
+    getImageRef() {
+      return this.$refs.image;
+    },
     onResize() {
-      const aspectRatioViewport = window.innerWidth / window.innerHeight;
-      const aspectRatioImage =
-        this.$refs.image.clientWidth / (this.$refs.image.clientHeight + 60);
-
-      if (aspectRatioViewport > aspectRatioImage) {
-        this.imageStyle = 'height: calc(100vh - 60px)';
-        this.controlsClass = '';
-      } else {
-        this.imageStyle = 'width: 100vw';
-        this.controlsClass = 'pr-2';
+      const image = this.getImageRef();
+      if (image) {
+        const aspectRatioViewport = window.innerWidth / window.innerHeight;
+        const aspectRatioImage = image.clientWidth / (image.clientHeight + 60);
+        if (aspectRatioViewport > aspectRatioImage) {
+          this.imageStyle = 'height: calc(100vh - 60px)';
+          this.controlsClass = '';
+        } else {
+          this.imageStyle = 'width: 100vw';
+          this.controlsClass = 'pr-2';
+        }
       }
     },
     next() {
       const index = this.index === this.files.length - 1 ? 0 : this.index + 1;
+      if (index !== this.index && !this.files[index].notFound) {
+        this.loading = true;
+      }
       this.setModalData({
         modal: 'lightbox',
         data: { index },
@@ -155,6 +216,9 @@ export default {
     },
     previous() {
       const index = this.index === 0 ? this.files.length - 1 : this.index - 1;
+      if (index !== this.index && !this.files[index].notFound) {
+        this.loading = true;
+      }
       this.setModalData({
         modal: 'lightbox',
         data: { index },

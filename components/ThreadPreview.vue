@@ -8,10 +8,15 @@
       <div class="flex items-center">
         <div
           v-if="
-            thread.sticky || thread.locked || thread.anchored || thread.cycle
+            thread.archived ||
+            thread.sticky ||
+            thread.locked ||
+            thread.anchored ||
+            thread.cycle
           "
           class="mr-4 space-x-1"
         >
+          <i v-if="thread.archived" class="fas fa-archive text-sm" />
           <i v-if="thread.sticky" class="fas fa-thumbtack text-sm" />
           <i v-if="thread.locked" class="fas fa-lock text-sm" />
           <i v-if="thread.anchored" class="fas fa-anchor text-sm" />
@@ -26,10 +31,10 @@
     </nuxt-link>
     <!-- Post Container -->
     <post
-      :post="rootPost"
+      :post="thread.rootPost"
       :thread="thread"
+      :append-reply="appendReply"
       :show-replies="showReplies"
-      :root-author-id="rootPost.authorId"
       class="m-5"
     >
       <slot></slot>
@@ -44,9 +49,10 @@ export default {
       type: Object,
       required: true,
     },
-    rootPost: {
-      type: Object,
-      required: true,
+    appendReply: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     showReplies: {
       type: Boolean,

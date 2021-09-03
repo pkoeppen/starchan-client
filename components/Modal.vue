@@ -1,7 +1,7 @@
 <template>
   <div
     v-show="visible"
-    class="fixed inset-0 overflow-auto bg-black bg-opacity-80 z-20"
+    class="fixed inset-0 overflow-auto bg-black bg-opacity-80 z-30"
   >
     <!-- Overlay -->
     <div class="absolute inset-0 z-20" @click="hideModal({ modal: id })" />

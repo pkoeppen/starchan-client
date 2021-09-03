@@ -4,13 +4,12 @@
       <table class="w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th scope="col" class="table-header">Ban ID</th>
-            <th scope="col" class="table-header">Created</th>
-            <th scope="col" class="table-header">Duration</th>
-            <th scope="col" class="table-header">Reason</th>
             <th scope="col" class="table-header">Board</th>
             <th scope="col" class="table-header">Post ID</th>
             <th scope="col" class="table-header">IP Address</th>
+            <th scope="col" class="table-header">Reason</th>
+            <th scope="col" class="table-header">Duration</th>
+            <th scope="col" class="table-header">Created</th>
             <th scope="col" class="py-1 text-left text-xs">
               <button
                 class="
@@ -35,14 +34,6 @@
         <tbody class="bg-white divide-y divide-gray-200">
           <template v-if="bans.length">
             <tr v-for="ban of bans" :key="ban.id">
-              <td class="table-cell font-bold">{{ ban.id }}</td>
-              <td class="table-cell">{{ $timeAgo(ban.createdAt) }}</td>
-              <td class="table-cell">
-                <template v-if="ban.duration === 0">indefinite</template>
-                <template v-else>{{ ban.duration }} days</template>
-              </td>
-              <td v-if="ban.reason" class="table-cell">{{ ban.reason }}</td>
-              <td v-else class="table-cell italic">none</td>
               <td class="table-cell">
                 <template v-if="ban.universal">universal</template>
                 <nuxt-link
@@ -74,6 +65,13 @@
                   >{{ ban.ipAddress }}</nuxt-link
                 >
               </td>
+              <td v-if="ban.reason" class="table-cell">{{ ban.reason }}</td>
+              <td v-else class="table-cell italic">none</td>
+              <td class="table-cell">
+                <template v-if="ban.duration === 0">indefinite</template>
+                <template v-else>{{ ban.duration }} days</template>
+              </td>
+              <td class="table-cell">{{ $timeAgo(ban.createdAt) }}</td>
               <td class="">
                 <button
                   class="
@@ -128,7 +126,6 @@ export default {
     },
     async resolvePost(postId) {
       const { data } = await this.$axios.get(`/posts/resolve/${postId}`);
-      console.log(data);
       this.$router.push(data);
     },
   },

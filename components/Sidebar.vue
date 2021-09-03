@@ -1,5 +1,8 @@
 <template>
-  <div class="flex flex-col items-center border-r px-5 flex-shrink-0">
+  <div
+    class="flex flex-col items-center px-5 flex-shrink-0 w-52"
+    :class="{ 'border-r': !searchResultsModalVisible }"
+  >
     <!-- Logo Group -->
     <board-select />
 
@@ -105,14 +108,24 @@ export default {
     boardId() {
       return this.$route.params.boardId || 'all';
     },
+    isArchiveRoute() {
+      return this.$route.path.includes('archive');
+    },
     isThreadRoute() {
-      if (this.$route.params.page || this.$route.params.threadId) {
+      const route = this.$route;
+      if (
+        (route.params.page || route.params.threadId) &&
+        !this.isArchiveRoute
+      ) {
         return true;
       }
-      if (this.$route.path === `/${this.boardId}/`) {
+      if (route.path === `/${this.boardId}/`) {
         return true;
       }
       return false;
+    },
+    searchResultsModalVisible() {
+      return this.$store.state.modals.searchResults.visible;
     },
   },
   mounted() {

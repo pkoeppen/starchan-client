@@ -1,8 +1,12 @@
 <template>
-  <div class="w-1/4 pt-5 px-5 flex-grow">
+  <div
+    class="w-1/4 pt-5 px-5 flex-grow flex flex-col absolute h-full right-0"
+    :class="{ 'border-l': !searchResultsModalVisible }"
+  >
     <!-- Ad Space -->
     <div
       class="
+        flex-shrink-0
         bg-gray-100
         h-32
         w-full
@@ -21,7 +25,7 @@
     </div>
 
     <!-- Sticky Threads -->
-    <div class="mb-4">
+    <div v-if="stickyThreads.length" class="mb-4">
       <div
         class="
           font-display
@@ -95,7 +99,7 @@
     </div>
 
     <!-- Latest Threads -->
-    <div>
+    <div class="flex-grow pb-5 flex flex-col overflow-hidden -mx-2">
       <div
         class="
           font-display
@@ -107,15 +111,20 @@
           text-sm text-gray-500
           tracking-wider
           mb-2
+          mx-2
         "
       >
         <span>Latest</span>
-        <i class="fas fa-sync-alt text-xs cursor-pointer hover:text-gray-700" />
+        <i
+          class="fas fa-sync-alt text-xs cursor-pointer hover:text-gray-700"
+          :class="{ 'animate-spin': latestThreadsLoading }"
+          @click="loadLatestThreads()"
+        />
       </div>
       <!-- Thread List -->
-      <div class="-mx-2">
+      <div ref="latestThreads" class="flex-grow overflow-hidden">
         <nuxt-link
-          v-for="(thread, n) of latestThreads"
+          v-for="(thread, n) of latestThreadsFiltered"
           :key="thread.id"
           :to="`/${thread.boardId}/thread/${thread.id}/`"
           class="
@@ -182,20 +191,74 @@
 export default {
   data() {
     return {
+      boardId: this.$route.params.boardId,
       stickyThreads: [],
       latestThreads: [],
+      canFitCount: 20,
+      latestThreadsLoading: false,
     };
   },
   async fetch() {
-    const boardId = this.$route.params.boardId;
-    this.stickyThreads = await this.$store.dispatch('api/getThreads', {
-      boardId,
-      sticky: true,
-    });
-    this.latestThreads = await this.$store.dispatch('api/getThreads', {
-      boardId,
-      latest: true,
-    });
+    try {
+      const boardId = this.boardId;
+      if (boardId !== 'all') {
+        this.stickyThreads = await this.$store.dispatch(
+          'api/listStickyThreads',
+          { boardId, take: 10 }
+        );
+      }
+      this.latestThreads = await this.$store.dispatch('api/listLatestThreads', {
+        boardId,
+        take: 20,
+      });
+    } catch (error) {
+      this.$catch(error);
+    }
+  },
+  computed: {
+    latestThreadsFiltered() {
+      return this.latestThreads.slice(0, this.canFitCount);
+    },
+    searchResultsModalVisible() {
+      return this.$store.state.modals.searchResults.visible;
+    },
+  },
+  mounted() {
+    this.latestThreadsInterval = setInterval(this.loadLatestThreads, 15000);
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.onResize);
+  },
+  methods: {
+    onResize() {
+      const height = this.$refs.latestThreads.clientHeight;
+      const itemHeight = 26; // Approximate height of each list element.
+      this.canFitCount = Math.floor(height / itemHeight);
+    },
+    async loadLatestThreads() {
+      this.latestThreadsLoading = true;
+      await this.pause(1000);
+      try {
+        this.latestThreads = await this.$store.dispatch(
+          'api/listLatestThreads',
+          {
+            boardId: this.boardId,
+            take: 20,
+          }
+        );
+      } catch (error) {
+        this.$catch(error);
+      } finally {
+        this.latestThreadsLoading = false;
+      }
+    },
+    pause(ms) {
+      return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+      });
+    },
   },
 };
 </script>

@@ -10,6 +10,7 @@ export default {
     const threads = await store.dispatch('api/getThreads', {
       boardId,
       page: 1,
+      archived: true,
     });
     return {
       threads,

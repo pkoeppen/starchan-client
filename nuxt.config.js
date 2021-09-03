@@ -9,6 +9,7 @@ export default {
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
   publicRuntimeConfig: {
+    env: process.env.NODE_ENV,
     socketUrl: process.env.SOCKET_URL,
     baseDataUrl: process.env.DATA_URL,
     axios: {

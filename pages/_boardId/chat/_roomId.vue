@@ -74,8 +74,10 @@ export default {
   },
   methods: {
     messageListener(message) {
-      this.messages.push(message);
-      this.scrollBottom();
+      if (message.roomId === this.roomId) {
+        this.messages.push(message);
+        this.scrollBottom();
+      }
     },
     messagesListener(messages) {
       this.loading = false;

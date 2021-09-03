@@ -6,9 +6,9 @@
           <tr>
             <th scope="col" class="table-header">Board ID</th>
             <th scope="col" class="table-header">Title</th>
-            <th scope="col" class="table-header">Created</th>
             <th scope="col" class="table-header">Thread Count</th>
             <th scope="col" class="table-header">Post Count</th>
+            <th scope="col" class="table-header">Created</th>
             <th scope="col" class="py-1 text-left text-xs">
               <button
                 class="
@@ -41,12 +41,11 @@
                 >
               </td>
               <td class="table-cell">{{ board.title }}</td>
-              <td class="table-cell">{{ $timeAgo(board.createdAt) }}</td>
-
               <td class="table-cell">
                 {{ board._count.threads }}
               </td>
               <td class="table-cell">{{ board._count.posts }}</td>
+              <td class="table-cell">{{ $timeAgo(board.createdAt) }}</td>
               <td>
                 <button
                   class="

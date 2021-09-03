@@ -22,7 +22,12 @@ export default {
   },
   computed: {
     listeners() {
-      return { ...this.$listeners, input: this.onInput, blur: this.onBlur };
+      return {
+        ...this.$listeners,
+        input: this.onInput,
+        blur: this.onBlur,
+        paste: this.onPaste,
+      };
     },
   },
 
@@ -57,6 +62,12 @@ export default {
       if (!text.replace(/[\s]+/, '').length) {
         event.target.innerHTML = '';
       }
+    },
+    onPaste(event) {
+      setTimeout(function () {
+        // eslint-disable-next-line
+        event.target.innerText = event.target.innerText;
+      }, 0);
     },
   },
 };

@@ -57,6 +57,11 @@ export const state = () => ({
       visible: false,
       data: {},
     },
+    // Search results modal.
+    searchResults: {
+      visible: false,
+      data: {},
+    },
   },
   mainScrollElement: null,
   sidebarScrollElement: null,
@@ -157,6 +162,15 @@ export const actions = {
 
 export const mutations = {
   showModal(_state, { modal, data }) {
+    // Close any other open modals.
+    for (const modalName in _state.modals) {
+      if (modalName === modal) continue;
+      const _modal = _state.modals[modalName];
+      if (_modal.visible) {
+        _modal.visible = false;
+        _modal.data = {};
+      }
+    }
     if (data) _state.modals[modal].data = data || {};
     _state.modals[modal].visible = true;
   },

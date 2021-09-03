@@ -6,7 +6,7 @@ export default function ({ $config }, inject) {
     autoConnect: false,
   });
 
-  if (process.env.NODE_ENV === 'local') {
+  if ($config.env === 'local') {
     // Dev logger.
     socket.onAny((event, ...args) => {
       console.log(`dev: ${event}:`, JSON.stringify(args, null, 2));

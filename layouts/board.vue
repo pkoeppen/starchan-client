@@ -8,6 +8,7 @@
     <modal-ban-post />
     <modal-edit-thread />
     <modal-start-chat />
+    <modal-search-results />
 
     <!-- Sidebar -->
     <sidebar />
@@ -19,7 +20,7 @@
 
       <!-- Thread Window -->
       <div class="flex flex-grow absolute top-14 bottom-0 left-0 right-0">
-        <div class="w-3/4 border-r relative">
+        <div class="w-3/4 relative">
           <Nuxt />
         </div>
 
@@ -32,7 +33,9 @@
 
 <script>
 import { mapState } from 'vuex';
+import ModalSearchResults from '../components/ModalSearchResults.vue';
 export default {
+  components: { ModalSearchResults },
   computed: {
     ...mapState(['modRoute']),
     boardId() {

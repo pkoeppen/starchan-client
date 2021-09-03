@@ -3,6 +3,7 @@
     <!-- Modals -->
     <modal-edit-board />
     <modal-edit-user />
+    <modal-search-results />
 
     <!-- Sidebar -->
     <sidebar />

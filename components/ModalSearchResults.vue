@@ -27,6 +27,7 @@
             v-model="searchQuery"
             placeholder="Search..."
             class="flex-grow placeholder-gray-400"
+            spellcheck="false"
             @input="handleSearchInputDebounced()"
           />
           <!-- <i
@@ -175,7 +176,12 @@ export default {
       }
     },
     async handleInfiniteScroll(event) {
-      if (event.target.scrollTop === event.target.scrollTopMax) {
+      const element = event.target;
+      const scrollTopMax =
+        element.scrollTopMax || element.scrollHeight - element.clientHeight;
+
+      // Subtract 10 pixels to give it a little room.
+      if (element.scrollTop >= scrollTopMax - 10) {
         if (this.searchResults.length === this.searchResultCount) {
           // We've already fetched all results.
           return;

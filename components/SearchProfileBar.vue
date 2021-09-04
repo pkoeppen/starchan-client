@@ -14,6 +14,7 @@
         v-model="searchQuery"
         placeholder="Search..."
         class="flex-grow placeholder-gray-400"
+        spellcheck="false"
         @input="handleSearchInputDebounced()"
       />
       <!-- <i

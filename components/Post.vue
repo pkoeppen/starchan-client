@@ -496,7 +496,7 @@ export default {
     replyHandler(event, postId) {
       if (
         this.$route.path ===
-        `/${this.post.boardId}/thread/${this.post.threadId}/`
+        `/${this.post.boardId}/thread/${this.post.threadId || this.post.id}/`
       ) {
         // If we're already on the thread page, append the post ID to the reply box.
         // Otherwise, let the link click event navigate to the thread page.
@@ -510,7 +510,7 @@ export default {
         modal: 'deletePost',
         data: {
           postId: this.post.id,
-          threadId: this.post.threadId,
+          threadId: this.post.threadId || this.post.id,
           boardId: this.post.boardId,
           ipAddress: this.post.ipAddress,
         },
@@ -522,7 +522,7 @@ export default {
         modal: 'reportPost',
         data: {
           postId: this.post.id,
-          threadId: this.post.threadId,
+          threadId: this.post.threadId || this.post.id,
           boardId: this.post.boardId,
           ipAddress: this.post.ipAddress,
         },
@@ -534,7 +534,7 @@ export default {
         modal: 'banPost',
         data: {
           postId: this.post.id,
-          threadId: this.post.threadId,
+          threadId: this.post.threadId || this.post.id,
           boardId: this.post.boardId,
           ipAddress: this.post.ipAddress,
         },
@@ -546,7 +546,7 @@ export default {
         modal: 'editThread',
         data: {
           boardId: this.post.boardId,
-          threadId: this.post.threadId,
+          threadId: this.post.threadId || this.post.id,
           sticky: this.thread.sticky,
           locked: this.thread.locked,
           anchored: this.thread.anchored,
@@ -563,7 +563,7 @@ export default {
         data: {
           authorTagColor: this.authorTagColor,
           authorId: this.post.authorId,
-          threadId: this.post.threadId,
+          threadId: this.post.threadId || this.post.id,
           boardId: this.post.boardId,
         },
       });

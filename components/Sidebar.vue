@@ -75,20 +75,17 @@
     <div class="w-full flex flex-col flex-grow justify-end">
       <div
         class="
+          relative
           w-full
-          h-44
           bg-gray-100
           rounded
-          flex
-          items-center
-          justify-center
           overflow-hidden
+          aspect-ratio-square
         "
       >
-        <img
-          src="http://amphibistudio.sg/egi/wp-content/uploads/2020/08/cat-lowpoly-300x300.jpg"
-          class="w-full h-full object-cover"
-        />
+        <div class="absolute inset-0">
+          <img src="~/static/slot-1.jpg" class="w-full h-full object-cover" />
+        </div>
       </div>
       <span class="text-xs py-3 text-gray-400 text-center">*chan v0.0.1</span>
     </div>

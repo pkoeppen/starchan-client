@@ -9,6 +9,9 @@
   html {
     font-size: 15px;
   }
+  * {
+    @apply outline-none;
+  }
   *:focus {
     @apply outline-none;
   }

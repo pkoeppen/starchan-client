@@ -7,21 +7,18 @@
     <div
       class="
         flex-shrink-0
-        bg-gray-100
-        h-32
+        relative
         w-full
+        bg-gray-100
         rounded
-        mb-4
-        flex
-        items-center
-        justify-center
         overflow-hidden
+        aspect-ratio-21/9
+        mb-4
       "
     >
-      <img
-        src="https://mir-s3-cdn-cf.behance.net/project_modules/2800_opt_1/00e5e810218663.58bec04f061fd.jpg"
-        class="w-full h-full object-cover"
-      />
+      <div class="absolute inset-0">
+        <img src="~/static/slot-2.jpg" class="w-full h-full object-cover" />
+      </div>
     </div>
 
     <!-- Sticky Threads -->

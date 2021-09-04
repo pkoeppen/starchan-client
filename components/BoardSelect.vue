@@ -12,6 +12,7 @@
         py-1.5
         space-x-2
         font-display
+        z-20
       "
       :class="{ 'bg-gray-100': showMenu }"
       @click="showMenu = !showMenu"
@@ -26,16 +27,8 @@
     <!-- Board Select Menu -->
     <div v-if="showMenu">
       <div
-        class="
-          absolute
-          bg-white
-          shadow-lg
-          rounded
-          overflow-hidden
-          left-6
-          top-12
-          z-20
-        "
+        class="absolute top-14 left-0 z-20 flex flex-col flex-wrap"
+        style="max-height: calc(100vh - 4em)"
       >
         <nuxt-link
           to="/all/"
@@ -53,8 +46,18 @@
         >
           /{{ board.id }}/ - {{ board.title }}
         </nuxt-link>
+        <nuxt-link
+          to="/"
+          class="homepage-link"
+          @click.native="showMenu = false"
+        >
+          Home Page
+        </nuxt-link>
       </div>
-      <div class="fixed inset-0 z-10" @click="showMenu = false" />
+      <div
+        class="fixed inset-0 z-10 bg-white opacity-95"
+        @click="showMenu = false"
+      />
     </div>
   </div>
 </template>
@@ -80,9 +83,12 @@ export default {
 </script>
 <style scoped>
 .board-link {
-  @apply block px-4 py-3 bg-white hover:bg-gray-100 cursor-pointer border-b whitespace-nowrap text-sm font-semibold;
+  @apply border mr-2 mb-2 rounded block px-4 py-3 bg-white hover:bg-gray-100 cursor-pointer border-b whitespace-nowrap text-sm font-semibold;
 }
 .board-link.nuxt-link-active {
   @apply text-blue-700 hover:bg-white;
+}
+.homepage-link {
+  @apply bg-gray-300 border border-gray-300 text-white text-center mr-2 mb-2 font-semibold text-sm px-5 py-3 rounded;
 }
 </style>

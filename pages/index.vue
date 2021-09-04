@@ -15,7 +15,7 @@
       >
         Boards
       </h1>
-      <div class="-mx-2">
+      <div class="-mx-2 grid grid-cols-3">
         <nuxt-link
           v-for="board of boards"
           :key="board.id"
